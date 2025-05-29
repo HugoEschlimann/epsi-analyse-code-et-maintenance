@@ -1,0 +1,21 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sonarQube:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run SonarQube Scanner
+      uses: sonarsource/sonarcloud-github-action@v1.9.0
+      with:
+        sonar_token: ${{ secrets.SONAR_TOKEN }}
+        projectKey: analyse-code-et-maintenance
+        host_url: https://sonarq.ouscloud.fr/
