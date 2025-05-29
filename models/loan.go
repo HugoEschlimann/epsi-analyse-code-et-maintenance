@@ -2,13 +2,9 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Loan struct {
-	gorm.Model
-
 	UserID     uint      `json:"userid"`
 	User       User      `gorm:"foreignKey:UserID"`
 

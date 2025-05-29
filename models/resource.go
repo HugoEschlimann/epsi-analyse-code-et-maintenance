@@ -1,7 +1,5 @@
 package models
 
-import "gorm.io/gorm"
-
 type ResourceType string
 
 const (
@@ -11,7 +9,6 @@ const (
 )
 
 type Resource struct {
-	gorm.Model
 	ID uint `gorm:"primaryKey"`
 	Title string
 	Type ResourceType
