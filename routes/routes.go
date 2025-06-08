@@ -24,19 +24,14 @@ func Setup(db *gorm.DB) *gin.Engine {
 		api.GET("/users", func(c *gin.Context) {
 			controllers.GetUsers(c, db)
 		})
-		api.GET("/users/:id", func(c *gin.Context) {
-			id := c.Param("id")
-			controllers.GetUserById(c, db, id)
-		})
 		api.POST("/users", func(c *gin.Context) {
 			controllers.CreateUser(c, db, &models.User{})
 		})
-		api.PUT("/users", func(c *gin.Context) {
+		api.PUT("/users/:id", func(c *gin.Context) {
 			controllers.UpdateUser(c, db, &models.User{})
 		})
 		api.DELETE("/users/:id", func(c *gin.Context) {
-			id := c.Param("id")
-			controllers.DeleteUser(c, db, id)
+			controllers.DeleteUser(c, db)
 		})
 	}
 	{
@@ -50,17 +45,19 @@ func Setup(db *gorm.DB) *gin.Engine {
 			controllers.GetResources(c, db)
 		})
 		api.DELETE("/resources/:id", func(c *gin.Context) {
-			id := c.Param("id")
-			controllers.DeleteResource(c, db, id)
+			controllers.DeleteResource(c, db)
 		})
 	}
 	{
 		api.POST("/loans", func(c *gin.Context) {
 			controllers.LoanResources(c, db, []*models.Loan{})
 		})
-		// api.POST("/restitute", func(c *gin.Context) {
-		// 	controllres.RestituteResources(c, db, []*models.Loan{})
-		// })
+		api.GET("/loans", func(c *gin.Context) {
+			controllers.GetLoans(c, db)
+		})
+		api.POST("/restitute", func(c *gin.Context) {
+			controllers.Restitute(c, db, []*models.Loan{})
+		})
 	}
 
 	return router

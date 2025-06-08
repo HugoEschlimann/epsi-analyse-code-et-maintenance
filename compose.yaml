@@ -15,19 +15,26 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env.example
     restart: unless-stopped
   db:
     image: mysql:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - "3307:3306"
     env_file:
       - .env.example
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
 volumes:
   db_data:
 

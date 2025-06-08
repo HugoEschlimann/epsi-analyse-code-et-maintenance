@@ -1,16 +1,12 @@
 package models
 
-import (
-	"time"
-)
-
 type Loan struct {
-	UserID     uint      `json:"userid"`
+	UserID     uint      `json:"user_id"`
 	User       User      `gorm:"foreignKey:UserID"`
 
-	ResourceID uint      `json:"resourceid"`
+	ResourceID uint      `json:"resource_id"`
 	Resource   Resource  `gorm:"foreignKey:ResourceID"`
 
-	LoanDate   *time.Time `gorm:"loandate"`
-	ReturnDate *time.Time `json:"returndate"`
+	LoanDate   string 	 `json:"loan_date"`
+	ReturnDate string 	 `json:"return_date"`
 }

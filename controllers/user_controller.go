@@ -28,24 +28,6 @@ func GetUsers(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, users)
 }
 
-// @Summary Get user by ID
-// @Description Get a user by their ID
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param id path string true "User ID"
-// @Success 200 {object} models.User
-// @Failure 500 {object} map[string]interface{}
-// @Router /users/{id} [get]
-func GetUserById(c *gin.Context, db *gorm.DB, id string) {
-	user, err := services.GetUserById(db, id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, user)
-}
-
 // @Summary Create a new user
 // @Description Create a new user with the provided details
 // @Tags Users
@@ -67,7 +49,7 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, fmt.Sprintf("User %s created successfully", user.Name))
+	c.JSON(http.StatusCreated, "User created successfully")
 }
 
 // @Summary Update an existing user
@@ -85,12 +67,14 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := services.UpdateUser(db, user)
+	
+	id := c.Param("id")
+	err := services.UpdateUser(db, id, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, fmt.Sprintf("User %s updated successfully", user.Name))
+	c.JSON(http.StatusOK, fmt.Sprintf("User %s updated successfully", id))
 }
 
 // @Summary Delete a user
@@ -102,7 +86,8 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 // @Success 200 {string} string "User deleted successfully"
 // @Failure 500 {object} map[string]interface{}
 // @Router /users/{id} [delete]
-func DeleteUser(c *gin.Context, db *gorm.DB, id string) {
+func DeleteUser(c *gin.Context, db *gorm.DB) {
+	id := c.Param("id")
 	err := services.DeleteUser(db, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

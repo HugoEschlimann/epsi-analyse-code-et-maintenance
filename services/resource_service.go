@@ -2,10 +2,8 @@ package services
 
 import (
 	"gin/models"
-	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -16,32 +14,23 @@ func CreateResource(db *gorm.DB, resource *models.Resource) error {
 
 func GetResources(db *gorm.DB) ([]models.Resource, error) {
 	var resources []models.Resource
-	db.Omit("Password").Find(&resources)
+	db.Find(&resources)
 	return resources, nil
 }
 
-func UpdateResource(c *gin.Context, db *gorm.DB, resourceId string) error {
-	var resource models.Resource
-
-	if err := db.First(&resource, resourceId).Error; err != nil {
+func UpdateResource(db *gorm.DB, id string, resource *models.Resource) error {
+	if err := db.First(&models.Resource{}, id).Error; err != nil {
 		return err
 	}
 
-	if err := c.ShouldBindJSON(&resource); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return err
-	}
-
-	if err := db.Model(&resource).Updates(resource).Error; err != nil {
-		return err
-	}
-	
-	return nil
+	resourceId, _ := strconv.ParseUint(id, 10, 32)
+	result := db.Model(&models.Resource{}).Where("id = ?", resourceId).Updates(resource)
+	return result.Error
 }
 
 func DeleteResource(db *gorm.DB, id string) error {
 	var resource models.Resource
 	resourceId, _ := strconv.ParseUint(id, 10, 32)
-	db.Where("id=?", resourceId).Delete(&resource)
-	return nil
+	result := db.Where("id=?", resourceId).Delete(&resource)
+	return result.Error
 }
