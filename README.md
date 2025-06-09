@@ -2,6 +2,12 @@
 
 Cette application est une API développée en Go avec le framework Gin. Elle utilise MySQL comme base de données et est déployée avec Docker.
 
+## Auteurs
+
+- [William Andreo](https://github.com/Ayden1416)
+- [Oussama Dahmani](https://github.com/ouskode)
+- [Hugo Eschlimann](https://github.com/HugoEschlimann)
+
 ## Prérequis
 
 Avant de lancer l'application, assurez-vous d'avoir installé les outils suivants :
