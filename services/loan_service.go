@@ -3,6 +3,8 @@ package services
 import (
 	"errors"
 	"gin/models"
+	"strconv"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -23,7 +25,8 @@ func LoanResources(db *gorm.DB, loans []*models.Loan) error {
 			return err
 		}
 
-		loan.LoanDate = "CURRENT_TIMESTAMP" // Assuming you want to set the current timestamp
+		now := time.Now()
+		loan.LoanDate = now.Format("02-01-2006")
 
 		if err := db.Create(loan).Error; err != nil {
 			return err
@@ -40,22 +43,27 @@ func GetLoans(db *gorm.DB) ([]models.Loan, error) {
 	return loans, nil
 }
 
-// update is_available resource field and delete loan
-func RestituteResources(db *gorm.DB, loans []*models.Loan) error {
-	for _, loan := range loans {
-		var resource models.Resource
-		if err := db.First(&resource, loan.ResourceID).Error; err != nil {
-			return err
-		}
+func UpdateLoan(db *gorm.DB, id string) error {
+	var loan models.Loan
+	if err := db.First(&loan, id).Error; err != nil {
+		return err
+	}
 
-		resource.IsAvailable = true
-		if err := db.Save(&resource).Error; err != nil {
-			return err
-		}
+	var resource models.Resource
+	if err := db.First(&resource, loan.ResourceID).Error; err != nil {
+		return err
+	}
 
-		if err := db.Where("user_id = ? AND resource_id = ?", loan.UserID, loan.ResourceID).Delete(&models.Loan{}).Error; err != nil {
-			return err
-		}
+	resource.IsAvailable = true
+	if err := db.Save(&resource).Error; err != nil {
+		return err
 	}
 	return nil
+}
+
+func DeleteLoan(db *gorm.DB, id string) error {
+	var loan models.Loan
+	loanId, _ := strconv.ParseUint(id, 10, 32)
+	result := db.Where("id=?", loanId).Delete(&loan)
+	return result.Error
 }

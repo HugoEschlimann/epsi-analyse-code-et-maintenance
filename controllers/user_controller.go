@@ -57,11 +57,11 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User details"
+// @Param id path string true "User ID"
 // @Success 200 {string} string "User updated successfully"
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /users [put]
+// @Router /users/{id} [put]
 func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -88,6 +88,11 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 // @Router /users/{id} [delete]
 func DeleteUser(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
+		return
+	}
+	
 	err := services.DeleteUser(db, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

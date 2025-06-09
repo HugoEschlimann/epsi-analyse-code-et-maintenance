@@ -63,7 +63,7 @@ func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 		}
 		return
 	}
-    c.JSON(http.StatusOK, gin.H{"message": "Resource updated successfully", "resource": resource})
+    c.JSON(http.StatusOK, gin.H{"message": "Resource updated successfully"})
 
 }
 
@@ -95,6 +95,11 @@ func GetResources(c *gin.Context, db *gorm.DB) {
 // @Router /resources/{id} [delete]
 func DeleteResource(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
+		return
+	}
+
 	err := services.DeleteResource(db, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

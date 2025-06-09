@@ -16,6 +16,34 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/loans": {
+            "get": {
+                "description": "Retrieve all loans",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Get all loans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Loan"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Loan resources to users",
                 "consumes": [
@@ -244,6 +272,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/restitute": {
+            "post": {
+                "description": "Restitute resources from loans",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Restitute resources",
+                "parameters": [
+                    {
+                        "description": "List of loans to restitute",
+                        "name": "loans",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Loan"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resources restituted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Get a list of all users",
@@ -370,43 +449,6 @@ const docTemplate = `{
             }
         },
         "/users/{id}": {
-            "get": {
-                "description": "Get a user by their ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get user by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Delete a user by their ID",
                 "consumes": [
@@ -450,22 +492,22 @@ const docTemplate = `{
         "models.Loan": {
             "type": "object",
             "properties": {
-                "loanDate": {
+                "loan_date": {
                     "type": "string"
                 },
                 "resource": {
                     "$ref": "#/definitions/models.Resource"
                 },
-                "resourceid": {
+                "resource_id": {
                     "type": "integer"
                 },
-                "returndate": {
+                "return_date": {
                     "type": "string"
                 },
                 "user": {
                     "$ref": "#/definitions/models.User"
                 },
-                "userid": {
+                "user_id": {
                     "type": "integer"
                 }
             }
@@ -479,7 +521,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "isAvailable": {
+                "is_available": {
                     "type": "boolean"
                 },
                 "title": {
@@ -495,12 +537,14 @@ const docTemplate = `{
             "enum": [
                 "book",
                 "game",
-                "film"
+                "film",
+                "autre"
             ],
             "x-enum-varnames": [
                 "Book",
                 "Game",
-                "Film"
+                "Film",
+                "Autre"
             ]
         },
         "models.User": {
@@ -509,13 +553,19 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "firstname": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "name": {
+                "lastname": {
                     "type": "string"
                 },
-                "password": {
+                "nationality": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }

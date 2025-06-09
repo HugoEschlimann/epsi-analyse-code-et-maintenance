@@ -55,8 +55,11 @@ func Setup(db *gorm.DB) *gin.Engine {
 		api.GET("/loans", func(c *gin.Context) {
 			controllers.GetLoans(c, db)
 		})
-		api.POST("/restitute", func(c *gin.Context) {
-			controllers.Restitute(c, db, []*models.Loan{})
+		api.PUT("/loans/:id", func(c *gin.Context) {
+			controllers.UpdateLoan(c, db)
+		})
+		api.DELETE("/loans/:id", func(c *gin.Context) {
+			controllers.DeleteLoan(c, db)
 		})
 	}
 
