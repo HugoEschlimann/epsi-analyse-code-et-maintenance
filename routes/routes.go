@@ -27,10 +27,10 @@ func Setup(db *gorm.DB) *gin.Engine {
 		api.POST("/users", func(c *gin.Context) {
 			controllers.CreateUser(c, db, &models.User{})
 		})
-		api.PUT("/users/:id", func(c *gin.Context) {
+		api.PUT("/users/:uuid", func(c *gin.Context) {
 			controllers.UpdateUser(c, db, &models.User{})
 		})
-		api.DELETE("/users/:id", func(c *gin.Context) {
+		api.DELETE("/users/:uuid", func(c *gin.Context) {
 			controllers.DeleteUser(c, db)
 		})
 	}

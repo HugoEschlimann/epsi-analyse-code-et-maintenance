@@ -2,7 +2,6 @@ package services
 
 import (
 	"gin/models"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -19,19 +18,18 @@ func GetUsers(db *gorm.DB) ([]models.User, error) {
 }
 
 
-func UpdateUser(db *gorm.DB, id string, user *models.User) error {
-	if err := db.First(&models.User{}, id).Error; err != nil {
+func UpdateUser(db *gorm.DB, userUuid string, user *models.User) error {
+	var currentUser models.User
+	if err := db.First(&currentUser, "public_id = ?", userUuid).Error; err != nil {
 		return err
 	}
 
-	userId, _ := strconv.ParseUint(id, 10, 32)
-	result := db.Model(&models.User{}).Where("id = ?", userId).Updates(user)
+	result := db.Model(&models.User{}).Where("id = ?", currentUser.ID).Updates(user)
 	return result.Error
 }
 
-func DeleteUser(db *gorm.DB, id string) error {
+func DeleteUser(db *gorm.DB, uuid string) error {
 	var user models.User
-	userId, _ := strconv.ParseUint(id, 10, 32)
-	result := db.Where("id=?", userId).Delete(&user)
+	result := db.Where("public_id=?", uuid).Delete(&user)
 	return result.Error
 }

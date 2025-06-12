@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"gin/models"
 	"gin/services"
 
@@ -32,7 +31,7 @@ func CreateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create resource"})
 		return
 	}
-	c.JSON(http.StatusCreated, fmt.Sprintf("Resource created successfully"))
+	c.JSON(http.StatusCreated, "Resource created successfully")
 }
 
 // @Summary Update an existing resource

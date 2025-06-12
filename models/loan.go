@@ -1,14 +1,16 @@
 package models
 
+import "github.com/google/uuid"
+
 type Loan struct {
-	ID 		   uint   `gorm:"primaryKey" json:"id"`
+	ID 		   uint   		`gorm:"primaryKey" json:"id"`
 
-	UserID     uint      `json:"user_id"`
-	User       User      `gorm:"foreignKey:UserID"`
+	UserUUID   uuid.UUID    `json:"user_uuid"`
+	User       User      	`gorm:"foreignKey:UserUUID"`
 
-	ResourceID uint      `json:"resource_id"`
-	Resource   Resource  `gorm:"foreignKey:ResourceID"`
+	ResourceID uint      	`json:"resource_id"`
+	Resource   Resource  	`gorm:"foreignKey:ResourceID"`
 
-	LoanDate   string 	 `json:"loan_date"`
-	ReturnDate string 	 `json:"return_date"`
+	LoanDate   string 	 	`json:"loan_date"`
+	ReturnDate string 	 	`json:"return_date"`
 }

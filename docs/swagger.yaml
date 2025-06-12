@@ -2,6 +2,8 @@ basePath: /api
 definitions:
   models.Loan:
     properties:
+      id:
+        type: integer
       loan_date:
         type: string
       resource:
@@ -12,8 +14,8 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/models.User'
-      user_id:
-        type: integer
+      user_uuid:
+        type: string
     type: object
   models.Resource:
     properties:
@@ -46,13 +48,13 @@ definitions:
         type: string
       firstname:
         type: string
-      id:
-        type: integer
       lastname:
         type: string
       nationality:
         type: string
       phone:
+        type: string
+      public_id:
         type: string
     type: object
 host: localhost:8080
@@ -113,6 +115,48 @@ paths:
             additionalProperties: true
             type: object
       summary: Loan resources
+      tags:
+      - Loans
+  /loans/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing loan with the provided details
+      parameters:
+      - description: Loan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Loan details
+        in: body
+        name: loan
+        required: true
+        schema:
+          $ref: '#/definitions/models.Loan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Loan updated successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing loan
       tags:
       - Loans
   /resources:
@@ -241,14 +285,12 @@ paths:
       - application/json
       description: Restitute resources from loans
       parameters:
-      - description: List of loans to restitute
+      - description: Loan to delete
         in: body
         name: loans
         required: true
         schema:
-          items:
-            $ref: '#/definitions/models.Loan'
-          type: array
+          $ref: '#/definitions/models.Loan'
       produces:
       - application/json
       responses:
@@ -322,17 +364,42 @@ paths:
       summary: Create a new user
       tags:
       - Users
+  /users/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by their UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a user
+      tags:
+      - Users
     put:
       consumes:
       - application/json
       description: Update an existing user with the provided details
       parameters:
-      - description: User details
-        in: body
-        name: user
+      - description: User UUID
+        in: path
+        name: uuid
         required: true
-        schema:
-          $ref: '#/definitions/models.User'
+        type: string
       produces:
       - application/json
       responses:
@@ -351,32 +418,6 @@ paths:
             additionalProperties: true
             type: object
       summary: Update an existing user
-      tags:
-      - Users
-  /users/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a user by their ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User deleted successfully
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete a user
       tags:
       - Users
 swagger: "2.0"

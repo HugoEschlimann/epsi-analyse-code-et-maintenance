@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"fmt"
 	"gin/models"
 	"gin/services"
 	"net/http"
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -43,6 +43,8 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
+
+	user.PublicID = uuid.New()
 	err := services.CreateUser(db, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
@@ -57,43 +59,40 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param id path string true "User ID"
+// @Param uuid path string true "User UUID"
 // @Success 200 {string} string "User updated successfully"
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /users/{id} [put]
+// @Router /users/{uuid} [put]
 func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 	
-	id := c.Param("id")
-	err := services.UpdateUser(db, id, user)
+	uuidParam := c.Param("uuid")
+	userUuid, _ := uuid.Parse(uuidParam)
+	err := services.UpdateUser(db, userUuid.String(), user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
-	c.JSON(http.StatusOK, fmt.Sprintf("User updated successfully"))
+	c.JSON(http.StatusOK, "User updated successfully")
 }
 
 // @Summary Delete a user
-// @Description Delete a user by their ID
+// @Description Delete a user by their UUID
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param id path string true "User ID"
+// @Param uuid path string true "User UUID"
 // @Success 200 {string} string "User deleted successfully"
 // @Failure 500 {object} map[string]interface{}
-// @Router /users/{id} [delete]
+// @Router /users/{uuid} [delete]
 func DeleteUser(c *gin.Context, db *gorm.DB) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
-		return
-	}
-	
-	err := services.DeleteUser(db, id)
+	uuidParam := c.Param("uuid")
+	userUuid, _ := uuid.Parse(uuidParam)
+	err := services.DeleteUser(db, userUuid.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return

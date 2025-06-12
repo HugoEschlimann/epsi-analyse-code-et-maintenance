@@ -94,6 +94,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/loans/{id}": {
+            "put": {
+                "description": "Update an existing loan with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Update an existing loan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Loan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Loan details",
+                        "name": "loan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Loan"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Loan updated successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/resources": {
             "get": {
                 "description": "Retrieve all resources",
@@ -287,15 +349,12 @@ const docTemplate = `{
                 "summary": "Restitute resources",
                 "parameters": [
                     {
-                        "description": "List of loans to restitute",
+                        "description": "Loan to delete",
                         "name": "loans",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Loan"
-                            }
+                            "$ref": "#/definitions/models.Loan"
                         }
                     }
                 ],
@@ -355,52 +414,6 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
-                "description": "Update an existing user with the provided details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update an existing user",
-                "parameters": [
-                    {
-                        "description": "User details",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User updated successfully",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a new user with the provided details",
                 "consumes": [
@@ -448,9 +461,53 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/users/{uuid}": {
+            "put": {
+                "description": "Update an existing user with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update an existing user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "delete": {
-                "description": "Delete a user by their ID",
+                "description": "Delete a user by their UUID",
                 "consumes": [
                     "application/json"
                 ],
@@ -464,8 +521,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID",
-                        "name": "id",
+                        "description": "User UUID",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -492,6 +549,9 @@ const docTemplate = `{
         "models.Loan": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "loan_date": {
                     "type": "string"
                 },
@@ -507,8 +567,8 @@ const docTemplate = `{
                 "user": {
                     "$ref": "#/definitions/models.User"
                 },
-                "user_id": {
-                    "type": "integer"
+                "user_uuid": {
+                    "type": "string"
                 }
             }
         },
@@ -556,9 +616,6 @@ const docTemplate = `{
                 "firstname": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "lastname": {
                     "type": "string"
                 },
@@ -566,6 +623,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                },
+                "public_id": {
                     "type": "string"
                 }
             }
