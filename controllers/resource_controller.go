@@ -23,16 +23,16 @@ import (
 // @Router /resources [post]
 func CreateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 	if err := c.ShouldBindJSON(&resource); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 
 	err := services.CreateResource(db, resource)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create resource"})
 		return
 	}
-	c.JSON(http.StatusCreated, fmt.Sprintf("Resource %s created successfully", resource.Type))
+	c.JSON(http.StatusCreated, fmt.Sprintf("Resource created successfully"))
 }
 
 // @Summary Update an existing resource
@@ -49,7 +49,7 @@ func CreateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 // @Router /resources/{id} [put]
 func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 	if err := c.ShouldBindJSON(&resource); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 	
@@ -57,9 +57,9 @@ func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 	err := services.UpdateResource(db, resourceId, resource)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Resource %s not found", resourceId)})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Resource not found"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update resource"})
 		}
 		return
 	}
@@ -78,7 +78,7 @@ func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 func GetResources(c *gin.Context, db *gorm.DB) {
 	resources, err := services.GetResources(db)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get resources"})
 		return
 	}
 	c.JSON(http.StatusOK, resources)
@@ -102,7 +102,7 @@ func DeleteResource(c *gin.Context, db *gorm.DB) {
 
 	err := services.DeleteResource(db, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete resource"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Resource deleted successfully"})

@@ -21,13 +21,13 @@ import (
 // @Router /loans [post]
 func LoanResources(c *gin.Context, db *gorm.DB, loans []*models.Loan) {
 	if err := c.ShouldBindJSON(&loans); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 
 	err := services.LoanResources(db, loans)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create loan"})
 		return
 	}
 	c.JSON(http.StatusCreated, "Loan(s) created successfully")
@@ -43,7 +43,7 @@ func LoanResources(c *gin.Context, db *gorm.DB, loans []*models.Loan) {
 func GetLoans(c *gin.Context, db *gorm.DB) {
 	loans, err := services.GetLoans(db)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get loans"})
 		return
 	}
 	c.JSON(http.StatusOK, loans)
@@ -68,7 +68,7 @@ func UpdateLoan(c *gin.Context, db *gorm.DB) {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Loan not found"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update loan"})
 		}
 		return
 	}
@@ -94,7 +94,7 @@ func DeleteLoan(c *gin.Context, db *gorm.DB) {
 
 	err := services.DeleteLoan(db, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete loan"})
 		return
 	}
 	c.JSON(http.StatusOK, "Loan deleted successfully")

@@ -21,7 +21,7 @@ import (
 func GetUsers(c *gin.Context, db *gorm.DB) {
 	users, err := services.GetUsers(db)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
 		return
 	}
 
@@ -40,12 +40,12 @@ func GetUsers(c *gin.Context, db *gorm.DB) {
 // @Router /users [post]
 func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 	err := services.CreateUser(db, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
@@ -64,17 +64,17 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 // @Router /users/{id} [put]
 func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 	
 	id := c.Param("id")
 	err := services.UpdateUser(db, id, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
-	c.JSON(http.StatusOK, fmt.Sprintf("User %s updated successfully", id))
+	c.JSON(http.StatusOK, fmt.Sprintf("User updated successfully"))
 }
 
 // @Summary Delete a user
@@ -95,7 +95,7 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 	
 	err := services.DeleteUser(db, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
