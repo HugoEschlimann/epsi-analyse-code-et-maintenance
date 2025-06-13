@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"gin/logger"
 	"gin/models"
 	"gin/services"
 
@@ -22,15 +24,18 @@ import (
 // @Router /resources [post]
 func CreateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 	if err := c.ShouldBindJSON(&resource); err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 
 	err := services.CreateResource(db, resource)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create resource"})
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Resource with ID %d created successfully", resource.ID))
 	c.JSON(http.StatusCreated, "Resource created successfully")
 }
 
@@ -48,6 +53,7 @@ func CreateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 // @Router /resources/{id} [put]
 func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 	if err := c.ShouldBindJSON(&resource); err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
@@ -55,6 +61,7 @@ func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 	resourceId := c.Param("id")
 	err := services.UpdateResource(db, resourceId, resource)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Resource not found"})
 		} else {
@@ -62,6 +69,7 @@ func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 		}
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Resource with ID %s updated successfully", resourceId))
     c.JSON(http.StatusOK, gin.H{"message": "Resource updated successfully"})
 
 }
@@ -77,9 +85,11 @@ func UpdateResource(c *gin.Context, db *gorm.DB, resource *models.Resource) {
 func GetResources(c *gin.Context, db *gorm.DB) {
 	resources, err := services.GetResources(db)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get resources"})
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Retrieved %d resources successfully", len(resources)))
 	c.JSON(http.StatusOK, resources)
 }
 
@@ -95,14 +105,17 @@ func GetResources(c *gin.Context, db *gorm.DB) {
 func DeleteResource(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
 	if id == "" {
+		logger.GetLogger().Error("ID is required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
 		return
 	}
 
 	err := services.DeleteResource(db, id)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete resource"})
 		return
 	}
+	logger.GetLogger().Info(fmt.Printf("Resource with ID %s deleted successfully", id))
 	c.JSON(http.StatusOK, gin.H{"message": "Resource deleted successfully"})
 }

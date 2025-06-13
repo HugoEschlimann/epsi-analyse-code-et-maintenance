@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"gin/logger"
 	"gin/models"
 	"gin/services"
 	"net/http"
@@ -21,15 +23,18 @@ import (
 // @Router /loans [post]
 func LoanResources(c *gin.Context, db *gorm.DB, loans []*models.Loan) {
 	if err := c.ShouldBindJSON(&loans); err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
 
 	err := services.LoanResources(db, loans)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create loan"})
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Successfully created %d loans", len(loans)))
 	c.JSON(http.StatusCreated, "Loan(s) created successfully")
 }
 
@@ -43,9 +48,11 @@ func LoanResources(c *gin.Context, db *gorm.DB, loans []*models.Loan) {
 func GetLoans(c *gin.Context, db *gorm.DB) {
 	loans, err := services.GetLoans(db)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get loans"})
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Retrieved %d loans successfully", len(loans)))
 	c.JSON(http.StatusOK, loans)
 }
 
@@ -65,6 +72,7 @@ func UpdateLoan(c *gin.Context, db *gorm.DB) {
 	loanId := c.Param("id")
 	err := services.UpdateLoan(db, loanId)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Loan not found"})
 		} else {
@@ -72,6 +80,7 @@ func UpdateLoan(c *gin.Context, db *gorm.DB) {
 		}
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Loan with ID %s updated successfully", loanId))
 	c.JSON(http.StatusOK, gin.H{"message": "Loan updated successfully"})
 }
 
@@ -88,14 +97,17 @@ func UpdateLoan(c *gin.Context, db *gorm.DB) {
 func DeleteLoan(c *gin.Context, db *gorm.DB) {
 	id := c.Param("id")
 	if id == "" {
+		logger.GetLogger().Error("ID is required for deletion")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
 		return
 	}
 
 	err := services.DeleteLoan(db, id)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete loan"})
 		return
 	}
+	logger.GetLogger().Info(fmt.Sprintf("Loan with ID %s deleted successfully", id))
 	c.JSON(http.StatusOK, "Loan deleted successfully")
 }

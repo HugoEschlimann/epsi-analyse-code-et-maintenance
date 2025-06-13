@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"fmt"
+	"gin/logger"
 	"gin/models"
 	"gin/services"
 	"net/http"
+
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +24,12 @@ import (
 func GetUsers(c *gin.Context, db *gorm.DB) {
 	users, err := services.GetUsers(db)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
 		return
 	}
 
+	logger.GetLogger().Info(fmt.Sprintf("Retrieved %d users successfully", len(users)))
 	c.JSON(http.StatusOK, users)
 }
 
@@ -40,6 +45,7 @@ func GetUsers(c *gin.Context, db *gorm.DB) {
 // @Router /users [post]
 func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	if err := c.ShouldBindJSON(&user); err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
@@ -47,10 +53,12 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	user.PublicID = uuid.New()
 	err := services.CreateUser(db, user)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
+	logger.GetLogger().Info(fmt.Sprintf("User with ID %d created successfully", user.ID))
 	c.JSON(http.StatusCreated, "User created successfully")
 }
 
@@ -66,6 +74,7 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 // @Router /users/{uuid} [put]
 func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	if err := c.ShouldBindJSON(&user); err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
@@ -74,9 +83,12 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	userUuid, _ := uuid.Parse(uuidParam)
 	err := services.UpdateUser(db, userUuid.String(), user)
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
+
+	logger.GetLogger().Info(fmt.Sprintf("User with UUID %s updated successfully", userUuid.String()))
 	c.JSON(http.StatusOK, "User updated successfully")
 }
 
@@ -94,8 +106,11 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 	userUuid, _ := uuid.Parse(uuidParam)
 	err := services.DeleteUser(db, userUuid.String())
 	if err != nil {
+		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
+
+	logger.GetLogger().Info(fmt.Sprintf("User with UUID %s deleted successfully", userUuid.String()))
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
