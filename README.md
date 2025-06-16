@@ -52,16 +52,21 @@ Pour accéder à la documentation : `http://localhost:8080/swagger/index.html`
     curl -X GET http://localhost:8080/api/users
     ```
 
-3. Modifier un utlisateur :
+3. Modifiez un utlisateur :
     ```bash
-    curl -X PUT http://localhost:8080/api/users/1 \
+    curl -X PUT http://localhost:8080/api/users/<uuid> \
          -H 'Content-Type: application/json' \
          -d '{"nationality": "german"}'
     ```
 
-4. Supprimer un utilisateur :
+4. Archivez un utilisateur :
     ```bash
-    curl -X DELETE http://localhost:8080/api/users/1
+    curl -X DELETE http://localhost:8080/api/users/<uuid>
+    ```
+
+5. Restorez un utilisateur :
+    ```bash
+    curl -X PUT http://localhost:8080/api/users/<uuid>/restore
     ```
 
 ### Resources

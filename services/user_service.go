@@ -7,13 +7,13 @@ import (
 )
 
 func CreateUser(db *gorm.DB, user *models.User) error {
-	result := db.Create(user)
+	result := db.Omit("id").Create(user)
 	return result.Error
 }
 
 func GetUsers(db *gorm.DB) ([]models.User, error) {
 	var users []models.User
-	db.Find(&users)
+	db.Where("deleted_at IS NULL").Find(&users)
 	return users, nil
 }
 
@@ -28,7 +28,17 @@ func UpdateUser(db *gorm.DB, userUuid string, user *models.User) error {
 	return result.Error
 }
 
-func DeleteUser(db *gorm.DB, uuid string) error {
+func RestoreUser(db *gorm.DB, uuid string) error {
+	result := db.
+		Unscoped().
+		Model(models.User{}).
+		Where("public_id=?", uuid).
+		Update("deleted_at", nil)
+
+	return result.Error
+}
+
+func ArchiveUser(db *gorm.DB, uuid string) error {
 	var user models.User
 	result := db.Where("public_id=?", uuid).Delete(&user)
 	return result.Error

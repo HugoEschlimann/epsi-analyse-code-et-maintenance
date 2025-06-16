@@ -48,6 +48,8 @@ definitions:
         type: string
       firstname:
         type: string
+      id:
+        type: integer
       lastname:
         type: string
       nationality:
@@ -368,7 +370,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a user by their UUID
+      description: Archive a user by their UUID
       parameters:
       - description: User UUID
         in: path
@@ -379,7 +381,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: User deleted successfully
+          description: User archive successfully
           schema:
             type: string
         "500":
@@ -387,7 +389,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Delete a user
+      summary: Archive a user
       tags:
       - Users
     put:
@@ -418,6 +420,32 @@ paths:
             additionalProperties: true
             type: object
       summary: Update an existing user
+      tags:
+      - Users
+  /users/{uuid}/restore:
+    patch:
+      consumes:
+      - application/json
+      description: Restore a deleted user by their UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User restored successfully
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Restore a deleted user
       tags:
       - Users
 swagger: "2.0"

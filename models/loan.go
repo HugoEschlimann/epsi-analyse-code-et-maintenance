@@ -3,7 +3,7 @@ package models
 import "github.com/google/uuid"
 
 type Loan struct {
-	ID 		   uint   		`gorm:"primaryKey" json:"id"`
+	ID 		   uint   		`gorm:"primaryKey;constraint:OnDelete:RESTRICT;" json:"id"`
 
 	UserUUID   uuid.UUID    `json:"user_uuid"`
 	User       User      	`gorm:"foreignKey:UserUUID"`

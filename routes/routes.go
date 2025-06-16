@@ -30,8 +30,11 @@ func Setup(db *gorm.DB) *gin.Engine {
 		api.PUT("/users/:uuid", func(c *gin.Context) {
 			controllers.UpdateUser(c, db, &models.User{})
 		})
+		api.PATCH("/users/:uuid/restore", func(c *gin.Context) {
+			controllers.RestoreUser(c, db)
+		})
 		api.DELETE("/users/:uuid", func(c *gin.Context) {
-			controllers.DeleteUser(c, db)
+			controllers.ArchiveUser(c, db)
 		})
 	}
 	{

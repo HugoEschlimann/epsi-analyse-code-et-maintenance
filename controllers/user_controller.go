@@ -5,9 +5,12 @@ import (
 	"gin/logger"
 	"gin/models"
 	"gin/services"
+	"gin/utils"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/nyaruka/phonenumbers"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -50,8 +53,21 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 		return
 	}
 
+	if err := utils.IsValidEmail(user.Email); !err {
+		logger.GetLogger().Error(fmt.Sprintf("Invalid email format: %s", user.Email))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+		return
+	}
+
+	phoneNumber, err := phonenumbers.Parse(user.Phone, "")
+	if err != nil || !phonenumbers.IsValidNumber(phoneNumber) {
+		logger.GetLogger().Error(fmt.Sprintf("Invalid phone number: %s", user.Phone))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+		return
+	}
+
 	user.PublicID = uuid.New()
-	err := services.CreateUser(db, user)
+	err = services.CreateUser(db, user)
 	if err != nil {
 		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
@@ -59,7 +75,7 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	}
 
 	logger.GetLogger().Info(fmt.Sprintf("User with ID %d created successfully", user.ID))
-	c.JSON(http.StatusCreated, "User created successfully")
+	c.JSON(http.StatusCreated, user.PublicID.String())
 }
 
 // @Summary Update an existing user
@@ -78,10 +94,36 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
 		return
 	}
+
+	if user.Email != "" && !utils.IsValidEmail(user.Email) {
+		logger.GetLogger().Error(fmt.Sprintf("Invalid email format: %s", user.Email))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+		return
+	}
+
+	if user.Phone != "" {
+		phoneNumber, err := phonenumbers.Parse(user.Phone, "")
+		if err != nil {
+			logger.GetLogger().Error(fmt.Sprintf("Invalid phone number: %s", user.Phone))
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+			return
+		}
+		if !phonenumbers.IsValidNumber(phoneNumber) {
+			logger.GetLogger().Error(fmt.Sprintf("Invalid phone number: %s", user.Phone))
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+			return
+		}
+	}
 	
 	uuidParam := c.Param("uuid")
-	userUuid, _ := uuid.Parse(uuidParam)
-	err := services.UpdateUser(db, userUuid.String(), user)
+	userUuid, err := uuid.Parse(uuidParam)
+	if err != nil {
+		logger.GetLogger().Error(fmt.Sprintf("Invalid UUID format: %s", uuidParam))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		return
+	}
+
+	err = services.UpdateUser(db, userUuid.String(), user)
 	if err != nil {
 		logger.GetLogger().Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
@@ -92,25 +134,78 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	c.JSON(http.StatusOK, "User updated successfully")
 }
 
-// @Summary Delete a user
-// @Description Delete a user by their UUID
+// @Summary Restore a deleted user
+// @Description Restore a deleted user by their UUID
 // @Tags Users
 // @Accept json
 // @Produce json
 // @Param uuid path string true "User UUID"
-// @Success 200 {string} string "User deleted successfully"
+// @Success 200 {string} string "User restored successfully"
 // @Failure 500 {object} map[string]interface{}
-// @Router /users/{uuid} [delete]
-func DeleteUser(c *gin.Context, db *gorm.DB) {
+// @Router /users/{uuid}/restore [patch]
+func RestoreUser(c *gin.Context, db *gorm.DB) {
 	uuidParam := c.Param("uuid")
-	userUuid, _ := uuid.Parse(uuidParam)
-	err := services.DeleteUser(db, userUuid.String())
+	userUuid, err := uuid.Parse(uuidParam)
+	if err != nil {
+		logger.GetLogger().Error(fmt.Sprintf("Invalid UUID format: %s", uuidParam))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		return
+	}
+
+	err = services.RestoreUser(db, userUuid.String())
 	if err != nil {
 		logger.GetLogger().Error(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to restore user"})
+		return
+	}
+
+	logger.GetLogger().Info(fmt.Sprintf("User with UUID %s restored successfully", userUuid.String()))
+	c.JSON(http.StatusOK, gin.H{"message": "User restored successfully"})
+}
+
+// @Summary Archive a user
+// @Description Archive a user by their UUID
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param uuid path string true "User UUID"
+// @Success 200 {string} string "User archive successfully"
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/{uuid} [delete]
+func ArchiveUser(c *gin.Context, db *gorm.DB) {
+	uuidParam := c.Param("uuid")
+	userUuid, err := uuid.Parse(uuidParam)
+	if err != nil {
+		logger.GetLogger().Error(fmt.Sprintf("Invalid UUID format: %s", uuidParam))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		return
+	}
+
+	var nbLoans int64
+	err = db.
+		Model(&models.Loan{}).
+		Where("user_uuid = ? AND return_date < ?", userUuid, time.Now().String()).
+		Count(&nbLoans).Error
+
+	if err != nil {
+		logger.GetLogger().Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count loans"})
+		return
+	}
+
+	if nbLoans > 0 {
+		logger.GetLogger().Error(fmt.Sprintf("User with UUID %s has active loans", userUuid.String()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User has active loans and cannot be archived"})
+		return
+	}
+
+	err = services.ArchiveUser(db, userUuid.String())
+	if err != nil {
+		logger.GetLogger().Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to archive user"})
 		return
 	}
 
 	logger.GetLogger().Info(fmt.Sprintf("User with UUID %s deleted successfully", userUuid.String()))
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "User archive successfully"})
 }

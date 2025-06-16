@@ -507,7 +507,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete a user by their UUID",
+                "description": "Archive a user by their UUID",
                 "consumes": [
                     "application/json"
                 ],
@@ -517,7 +517,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Delete a user",
+                "summary": "Archive a user",
                 "parameters": [
                     {
                         "type": "string",
@@ -529,7 +529,46 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User deleted successfully",
+                        "description": "User archive successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{uuid}/restore": {
+            "patch": {
+                "description": "Restore a deleted user by their UUID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Restore a deleted user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User restored successfully",
                         "schema": {
                             "type": "string"
                         }
@@ -615,6 +654,9 @@ const docTemplate = `{
                 },
                 "firstname": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "lastname": {
                     "type": "string"
