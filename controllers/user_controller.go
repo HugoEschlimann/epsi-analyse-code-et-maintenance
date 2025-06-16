@@ -54,15 +54,15 @@ func CreateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	}
 
 	if err := utils.IsValidEmail(user.Email); !err {
-		logger.GetLogger().Error(fmt.Sprintf("Invalid email format: %s", user.Email))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+		logger.GetLogger().Error(fmt.Sprintf("%s: %s", utils.ErrorEmail, user.Email))
+		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrorEmail})
 		return
 	}
 
 	phoneNumber, err := phonenumbers.Parse(user.Phone, "")
 	if err != nil || !phonenumbers.IsValidNumber(phoneNumber) {
-		logger.GetLogger().Error(fmt.Sprintf("Invalid phone number: %s", user.Phone))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+		logger.GetLogger().Error(fmt.Sprintf("%s: %s", utils.ErrorPhone, user.Phone))
+		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrorPhone})
 		return
 	}
 
@@ -96,21 +96,21 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	}
 
 	if user.Email != "" && !utils.IsValidEmail(user.Email) {
-		logger.GetLogger().Error(fmt.Sprintf("Invalid email format: %s", user.Email))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+		logger.GetLogger().Error(fmt.Sprintf("%s: %s", user.Email))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "%s"})
 		return
 	}
 
 	if user.Phone != "" {
 		phoneNumber, err := phonenumbers.Parse(user.Phone, "")
 		if err != nil {
-			logger.GetLogger().Error(fmt.Sprintf("Invalid phone number: %s", user.Phone))
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+			logger.GetLogger().Error(fmt.Sprintf("%s: %s", utils.ErrorPhone, user.Phone))
+			c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrorPhone})
 			return
 		}
 		if !phonenumbers.IsValidNumber(phoneNumber) {
-			logger.GetLogger().Error(fmt.Sprintf("Invalid phone number: %s", user.Phone))
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+			logger.GetLogger().Error(fmt.Sprintf("%s: %s", utils.ErrorPhone, user.Phone))
+			c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrorPhone})
 			return
 		}
 	}
@@ -118,8 +118,8 @@ func UpdateUser(c *gin.Context, db *gorm.DB, user *models.User) {
 	uuidParam := c.Param("uuid")
 	userUuid, err := uuid.Parse(uuidParam)
 	if err != nil {
-		logger.GetLogger().Error(fmt.Sprintf("Invalid UUID format: %s", uuidParam))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		logger.GetLogger().Error(fmt.Sprintf("%s: %s", utils.ErrorUUID, uuidParam))
+		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrorUUID})
 		return
 	}
 
@@ -147,8 +147,8 @@ func RestoreUser(c *gin.Context, db *gorm.DB) {
 	uuidParam := c.Param("uuid")
 	userUuid, err := uuid.Parse(uuidParam)
 	if err != nil {
-		logger.GetLogger().Error(fmt.Sprintf("Invalid UUID format: %s", uuidParam))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		logger.GetLogger().Error(fmt.Sprintf("%s: %s", uuidParam))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "%s"})
 		return
 	}
 
@@ -176,8 +176,8 @@ func ArchiveUser(c *gin.Context, db *gorm.DB) {
 	uuidParam := c.Param("uuid")
 	userUuid, err := uuid.Parse(uuidParam)
 	if err != nil {
-		logger.GetLogger().Error(fmt.Sprintf("Invalid UUID format: %s", uuidParam))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		logger.GetLogger().Error(fmt.Sprintf("%s: %s", uuidParam))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "%s"})
 		return
 	}
 
