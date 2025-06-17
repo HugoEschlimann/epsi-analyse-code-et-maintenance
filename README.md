@@ -7,6 +7,7 @@ Cette application est une API développée en Go avec le framework Gin. Elle uti
 - [William Andreo](https://github.com/Ayden1416)
 - [Oussama Dahmani](https://github.com/ouskode)
 - [Hugo Eschlimann](https://github.com/HugoEschlimann)
+- [Thibault Bernuz](https://github.com/Haaycee)
 
 ## Prérequis
 
